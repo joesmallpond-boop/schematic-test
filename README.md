@@ -1,10 +1,10 @@
-# Bumm ))))º(((( Life — Max for Live
+# The Doom Box — Max for Live
 
 An Ableton Live audio effect built from the pedal schematic in [`docs/schematic.png`](docs/schematic.png) and the parts list in [`docs/parts-list.png`](docs/parts-list.png). Every stage is modelled from its real component values. The device doesn't add any controls the pedal doesn't have.
 
 ![UI](docs/ui-preview.png)
 
-**Install:** drag `device/Bumm Life.amxd` onto an audio track (needs Live Suite or Max for Live).
+**Install:** drag `device/Doom Box.amxd` onto an audio track (needs Live Suite or Max for Live).
 
 ## Controls (same as the pedal)
 
@@ -39,11 +39,13 @@ The pedal has only two jacks, so the chain is IN → DIST section → BOOST → 
 - **Assumed part values (not on the schematic):** J201 Idss 0.6 mA / Vp −0.8 V; BS170 Vth 2.1 V, K 0.05 A/V².
 - **D2/D3 orientation:** in the drawing they're hard to read, so I've assumed they point into Q2's base. That's the only way the stage can bias and work as a full-wave octave.
 
+Max stores patcher boxes front-to-back (first = drawn on top), so the builder writes them in reverse of the order it creates them.
+
 ## Rebuilding
 
 ```
 cd tools
-python3 gencode.py                                  # writes dsp.genexpr
-python3 build_amxd.py "../device/Bumm Life.amxd" dsp.genexpr
+python3 gencode.py && mv dsp.genexpr ../src/doom_box.genexpr
+python3 build_amxd.py "../device/Doom Box.amxd" ../src/doom_box.genexpr
 python3 test.py                                     # offline tests: runs the gen code through harness.js in Node
 ```

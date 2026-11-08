@@ -8,7 +8,7 @@ OS = int(os.environ.get('OS', '8'))
 SOS = signal.ellip(10, 0.05, 100, 0.9 / OS, output='sos')
 
 HEADER = r"""// =====================================================================
-//  BUMM ))))º(((( LIFE  —  component-level model of the schematic
+//  THE DOOM BOX  —  component-level model of the schematic
 //  Octave-up (Q3/Q4 splitter + D2/D3) > LM308 RAT stage > J201 buffer
 //  > BS170 MOSFET boost.  8x oversampled, mono like the pedal
 //  (L+R summed in, same signal out both sides).  1.0 = 1 volt.

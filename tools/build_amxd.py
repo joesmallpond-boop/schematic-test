@@ -1,4 +1,4 @@
-"""Builds 'Bumm Life.amxd' (Max for Live audio effect) around the generated gen~ code."""
+"""Builds 'Doom Box.amxd' (Max for Live audio effect) around the generated gen~ code."""
 import json, struct, sys
 
 CODE = open(__import__('sys').argv[2] if len(__import__('sys').argv) > 2 else 'dsp.genexpr').read()
@@ -239,9 +239,9 @@ footswitch(64, 'Dist On', 1, 'dist_on', 'DIST', 1100)
 footswitch(336, 'Boost On', 0, 'boost_on', 'BOOST', 1300)
 
 # ---------------------------------------------------------------- graphics / name
-text([166, 82, 116, 26], 'BUMM', 22, INK)
-text([166, 106, 116, 18], '))))º((((', 14, '#c9452f')
-text([166, 122, 116, 26], 'LIFE', 22, INK)
+text([166, 86, 116, 12], 'THE', 9, '#c9452f')
+text([166, 97, 116, 28], 'DOOM', 24, INK)
+text([166, 123, 116, 28], 'BOX', 24, INK)
 
 patcher = {'patcher': {
     'fileversion': 1,
@@ -258,7 +258,8 @@ patcher = {'patcher': {
     'description': 'Octave-up > LM308 distortion > BS170 MOSFET boost, modelled component-by-component from the schematic.',
     'digest': '', 'tags': '', 'style': '', 'subpatcher_template': '',
     'assistshowspatchername': 0,
-    'boxes': boxes, 'lines': lines,
+    # Max stores boxes front-to-back (first = drawn on top), so reverse our back-to-front build order
+    'boxes': boxes[::-1], 'lines': lines,
     'dependency_cache': [], 'latency': 0, 'is_mpe': 0, 'autosave': 0,
 }}
 
@@ -272,7 +273,7 @@ def write_amxd(path):
 
 
 if __name__ == '__main__':
-    out = sys.argv[1] if len(sys.argv) > 1 else 'Bumm Life.amxd'
+    out = sys.argv[1] if len(sys.argv) > 1 else 'Doom Box.amxd'
     write_amxd(out)
     json.dump(patcher, open(out.replace('.amxd', '.maxpat'), 'w'), indent=1, ensure_ascii=False)
     print('wrote', out, len(boxes), 'boxes', len(lines), 'lines')
