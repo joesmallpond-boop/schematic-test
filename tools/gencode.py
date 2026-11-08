@@ -14,15 +14,6 @@ HEADER = r"""// ================================================================
 //  (L+R summed in, same signal out both sides).  1.0 = 1 volt.
 // =====================================================================
 
-Param octave(0.5, min=0, max=1);     // OCTAVE 50KB
-Param distortion(0.5, min=0, max=1); // DIST 100KA
-Param filter(0.3, min=0, max=1);     // FILTER 100KA
-Param amps(0.6, min=0, max=1);       // AMPS 100KA
-Param boost(0.5, min=0, max=1);      // BOOST 100KA
-Param clipmode(0, min=0, max=2);     // SW1: 0 = D4/D6 LED + D5, 1 = off, 2 = D7/D8
-Param dist_on(1, min=0, max=1);      // footswitch 1
-Param boost_on(0, min=0, max=1);     // footswitch 2
-
 // ---------- pot tapers ----------
 taperA(t) {
     return (exp(4.394 * t) - 1) / (exp(4.394) - 1);
@@ -93,6 +84,16 @@ mosvd(vg) {
 tptg(fc, sr) {
     return tan(pi * min(fc, 0.45 * sr) / sr);
 }
+"""
+
+PARAMS = """Param pot_octave(0.5, min=0, max=1);     // OCTAVE 50KB
+Param pot_dist(0.5, min=0, max=1); // DIST 100KA
+Param pot_filter(0.3, min=0, max=1);     // FILTER 100KA
+Param pot_amps(0.6, min=0, max=1);       // AMPS 100KA
+Param pot_boost(0.5, min=0, max=1);      // BOOST 100KA
+Param sw_clip(0, min=0, max=2);     // SW1: 0 = D4/D6 LED + D5, 1 = off, 2 = D7/D8
+Param fs_dist(1, min=0, max=1);      // footswitch 1
+Param fs_boost(0, min=0, max=1);     // footswitch 2
 """
 
 STATE_INIT = {
@@ -268,6 +269,7 @@ def channel_block(c, inp, outv):
 def build():
     out = [HEADER]
     out.append('// ---------- state ----------')
+    out.append(PARAMS)
     out += ['History sm_oct(0.5);', 'History sm_dist(0.5);', 'History sm_flt(0.3);',
             'History sm_amps(0.6);', 'History sm_boost(0.5);', 'History sm_dm(1);',
             'History sm_bm(0);', 'History last_rd(-1);', 'History fc_gbw(1000);',
@@ -285,13 +287,13 @@ VG0 = 2.3901877380900185;
 sr4 = samplerate * OSF;
 sk = 1 - exp(-1 / (0.02 * samplerate));
 fk = 1 - exp(-1 / (0.004 * samplerate));
-p_oct = sm_oct + (octave - sm_oct) * sk;
-p_dist = sm_dist + (distortion - sm_dist) * sk;
-p_flt = sm_flt + (filter - sm_flt) * sk;
-p_amps = sm_amps + (amps - sm_amps) * sk;
-p_boost = sm_boost + (boost - sm_boost) * sk;
-dm = sm_dm + ((dist_on > 0.5) - sm_dm) * fk;
-bm = sm_bm + ((boost_on > 0.5) - sm_bm) * fk;
+p_oct = sm_oct + (pot_octave - sm_oct) * sk;
+p_dist = sm_dist + (pot_dist - sm_dist) * sk;
+p_flt = sm_flt + (pot_filter - sm_flt) * sk;
+p_amps = sm_amps + (pot_amps - sm_amps) * sk;
+p_boost = sm_boost + (pot_boost - sm_boost) * sk;
+dm = sm_dm + ((fs_dist > 0.5) - sm_dm) * fk;
+bm = sm_bm + ((fs_boost > 0.5) - sm_bm) * fk;
 sm_oct = p_oct;
 sm_dist = p_dist;
 sm_flt = p_flt;
@@ -304,14 +306,15 @@ rd = 100000 * taperA(p_dist) + 1;
 rf = 100000 * taperA(p_flt);
 a_amps = taperA(p_amps);
 a_boost = taperA(p_boost);
-cmode = floor(clamp(clipmode, 0, 2) + 0.5);
+cmode = floor(clamp(sw_clip, 0, 2) + 0.5);
 
 // closed-loop bandwidth of the LM308 (GBW 1 MHz with 30p) for this DIST setting
 fg = fc_gbw;
+lrd = last_rd;
 f = 0;
 j = 0;
 w = 0; zd = 0; zr = 0; zi = 0; t1 = 0; t2 = 0; yr = 0; yim = 0; gr = 0; gi = 0;
-if (abs(rd - last_rd) > 0.5) {
+if (abs(rd - lrd) > 0.5) {
     f = max(fg, 10);
     for (j = 0; j < 24; j += 1) {
         w = twopi * f;
@@ -327,9 +330,10 @@ if (abs(rd - last_rd) > 0.5) {
         f = sqrt(f * 1000000 / sqrt(gr * gr + gi * gi));
     }
     fg = f;
-    last_rd = rd;
-    fc_gbw = fg;
+    lrd = rd;
 }
+last_rd = lrd;
+fc_gbw = fg;
 
 g_c2 = tptg(1.5915, sr4);
 g_c3 = tptg(3.1831, sr4);
@@ -378,6 +382,13 @@ out3 = lp * dm;
     return '\n'.join(out)
 
 
+def no_sci(code):
+    import numpy as np
+    def fix(m):
+        return np.format_float_positional(float(m.group(0)), trim='-')
+    return re.sub(r'(?<![\w.])\d+(?:\.\d+)?[eE][-+]?\d+', fix, code)
+
+
 if __name__ == '__main__':
-    open('dsp.genexpr', 'w').write(build())
+    open('dsp.genexpr', 'w').write(no_sci(build()))
     print('ok', len(build()))

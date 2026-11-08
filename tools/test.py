@@ -1,7 +1,16 @@
 import numpy as np, subprocess, json, sys
 SR = 48000
+import os
+GEN = os.environ.get('GEN', '../src/doom_box.genexpr')
+
+REN = {'octave': 'pot_octave', 'distortion': 'pot_dist', 'filter': 'pot_filter', 'amps': 'pot_amps',
+       'boost': 'pot_boost', 'clipmode': 'sw_clip', 'dist_on': 'fs_dist', 'boost_on': 'fs_boost'}
+
 
 def run(x, params, sr=SR, auto=None):
+    params = {REN.get(k, k): v for k, v in params.items()}
+    if auto:
+        auto = {s: {REN.get(k, k): v for k, v in d.items()} for s, d in auto.items()}
     st = np.stack([x, x], 1).astype(np.float64).ravel()
     st.tofile('/tmp/in.f64')
     import os
@@ -9,7 +18,7 @@ def run(x, params, sr=SR, auto=None):
         os.remove('/tmp/in.f64.auto.json')
     if auto:
         json.dump(auto, open('/tmp/in.f64.auto.json', 'w'))
-    r = subprocess.run(['node', 'harness.js', 'dsp.genexpr', '/tmp/in.f64', '/tmp/out.f64', str(sr), json.dumps(params)],
+    r = subprocess.run(['node', 'harness.js', GEN, '/tmp/in.f64', '/tmp/out.f64', str(sr), json.dumps(params)],
                        capture_output=True, text=True)
     if r.returncode:
         print(r.stderr); sys.exit(1)

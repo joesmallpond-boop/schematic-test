@@ -148,11 +148,11 @@ def knob(cx, name, short, init, label):
 
 
 knobs = [
-    (64, 'Octave', 'Octave', 5.0, 'OCTAVE', 'octave'),
-    (126, 'Distortion', 'Dist', 5.0, 'DISTORTION', 'distortion'),
-    (188, 'Filter', 'Filter', 3.0, 'FILTER', 'filter'),
-    (250, 'Amps', 'Amps', 6.0, 'AMPS', 'amps'),
-    (336, 'Boost', 'Boost', 5.0, 'BOOST', 'boost'),
+    (64, 'Octave', 'Octave', 5.0, 'OCTAVE', 'pot_octave'),
+    (126, 'Distortion', 'Dist', 5.0, 'DISTORTION', 'pot_dist'),
+    (188, 'Filter', 'Filter', 3.0, 'FILTER', 'pot_filter'),
+    (250, 'Amps', 'Amps', 6.0, 'AMPS', 'pot_amps'),
+    (336, 'Boost', 'Boost', 5.0, 'BOOST', 'pot_boost'),
 ]
 for n, (cx, name, short, init, label, pname) in enumerate(knobs):
     d = knob(cx, name, short, init, label)
@@ -174,7 +174,7 @@ tab = add({'maxclass': 'live.tab', 'varname': 'Clip', 'numinlets': 1, 'numoutlet
                'parameter_longname': 'Clip', 'parameter_shortname': 'Clip', 'parameter_type': 2,
                'parameter_enum': ['LED', 'OFF', 'SI'], 'parameter_mmax': 2,
                'parameter_initial_enable': 1, 'parameter_initial': [0]}}})
-to_gen(tab, 0, 'clipmode', 950, 330)
+to_gen(tab, 0, 'sw_clip', 950, 330)
 
 # D6 (red 3 mm LED in the clipping network) — glows with its current
 d6 = panel([149, 97, 8, 8], LED_OFF, rounded=4, border=1, bordercolor=rgba('#0a0a08'), name='d6')
@@ -235,8 +235,8 @@ def footswitch(cx, name, init, pname, label, x):
     wire(on, 0, led, 0)
 
 
-footswitch(64, 'Dist On', 1, 'dist_on', 'DIST', 1100)
-footswitch(336, 'Boost On', 0, 'boost_on', 'BOOST', 1300)
+footswitch(64, 'Dist On', 1, 'fs_dist', 'DIST', 1100)
+footswitch(336, 'Boost On', 0, 'fs_boost', 'BOOST', 1300)
 
 # ---------------------------------------------------------------- graphics / name
 text([166, 86, 116, 12], 'THE', 9, '#c9452f')

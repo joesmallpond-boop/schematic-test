@@ -39,6 +39,8 @@ The pedal has only two jacks, so the chain is IN → DIST section → BOOST → 
 - **Assumed part values (not on the schematic):** J201 Idss 0.6 mA / Vp −0.8 V; BS170 Vth 2.1 V, K 0.05 A/V².
 - **D2/D3 orientation:** in the drawing they're hard to read, so I've assumed they point into Q2's base. That's the only way the stage can bias and work as a full-wave octave.
 
+The gen~ code puts functions first, then Params/Histories, then statements (a GenExpr rule). It uses plain decimal literals only and writes every History at top level, never inside an `if` or a loop.
+
 Max stores patcher boxes front-to-back (first = drawn on top), so the builder writes them in reverse of the order it creates them.
 
 ## Rebuilding
